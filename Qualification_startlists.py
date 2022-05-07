@@ -12,6 +12,7 @@ import xlsxwriter
 import pandas as pd
 import datetime
 from random import sample
+import sys
 
 
 class Runner:
@@ -31,7 +32,7 @@ class Runner:
         self.Rank = 1 + _runners.index(self)
 
     def __str__(self):
-        return str(self.Firstname + self.Surname)
+        return str(self.Firstname + " " + self.Surname)
 
 
 class Nation:
@@ -176,13 +177,20 @@ nations = []
 
 start_time = timeit.default_timer()
 
-# read entered runners data file
-df = pd.ExcelFile('entries.xlsx')
+# Get file paths and input sheet_name from console parameters.
+entries_file = str(sys.argv[1]) if len(sys.argv) > 1 else 'entries.xlsx'
+start_list_file = str(sys.argv[2]) if len(sys.argv) > 2 else 'startlists.xlsx'
+sheet_name = str(sys.argv[3]) if len(sys.argv) > 3 else 0
+skip_rows = 0 if len(sys.argv) > 1 else 3  # The default 'entries.xlsx' has three blank rows before the header.
 
-sheet1 = df.parse(0)
-for teller in range(3, len(sheet1)):
+# read entered runners data file
+df = pd.ExcelFile(entries_file)
+
+sheet1 = df.parse(sheet_name)
+for teller in range(skip_rows, len(sheet1)):
     # read a row
-    row1 = sheet1.iloc[teller].real
+    row1 = sheet1.iloc[teller]
+    # row1 = row1.real
     try:
         runner = Runner()
         runner.ID = row1[0]
@@ -224,32 +232,32 @@ while True:
 runners = sorted(runners, key=lambda x: (x.Heat, x.Time))
 
 # print en export to Excel
-workbook = xlsxwriter.Workbook('startlists.xlsx')
+workbook = xlsxwriter.Workbook(start_list_file)
 # engineer data from Clicksoftware
 startlist_sheet = workbook.add_worksheet('startlist')
 row = 0
 col = 0
-startlist_sheet.write(row, col, 'Heat')
-startlist_sheet.write(row, col+1, 'Time')
-startlist_sheet.write(row, col+2, 'Firstname')
-startlist_sheet.write(row, col+3, 'Surname')
-startlist_sheet.write(row, col+4, 'FED')
-startlist_sheet.write(row, col+5, 'Rank')
-startlist_sheet.write(row, col+6, 'RankingPoints')
-startlist_sheet.write(row, col+7, 'ID')
-startlist_sheet.write(row, col+8, 'StartGrp')
+startlist_sheet.write(row, col  , 'IOF ID')
+startlist_sheet.write(row, col+1, 'Organisation')
+startlist_sheet.write(row, col+2, 'Surname')
+startlist_sheet.write(row, col+3, 'First name')
+startlist_sheet.write(row, col+4, 'Heat')
+startlist_sheet.write(row, col+5, 'Start Time')
+startlist_sheet.write(row, col+6, 'Start Group')
+# startlist_sheet.write(row, col+7, 'Rank')
+# startlist_sheet.write(row, col+8, 'Score (based on ranking points)')
 row = 1
 for r in runners:
     print(r.Heat, r.Time, r, r.FED, r.Rank, r.ID, sep =";")
-    startlist_sheet.write(row, col, r.Heat)
-    startlist_sheet.write(row, col+1, r.Time)
-    startlist_sheet.write(row, col+2, r.Firstname)
-    startlist_sheet.write(row, col+3, r.Surname)
-    startlist_sheet.write(row, col+4, r.FED)
-    startlist_sheet.write(row, col+5, r.Rank)
-    startlist_sheet.write(row, col+6, r.RankingPoints)
-    startlist_sheet.write(row, col+7, r.ID)
-    startlist_sheet.write(row, col+8, r.StartGrp)
+    startlist_sheet.write(row, col  , r.ID)
+    startlist_sheet.write(row, col+1, r.FED)
+    startlist_sheet.write(row, col+2, r.Surname)
+    startlist_sheet.write(row, col+3, r.Firstname)
+    startlist_sheet.write(row, col+4, r.Heat)
+    startlist_sheet.write(row, col+5, r.Time)
+    startlist_sheet.write(row, col+6, r.StartGrp)
+    # startlist_sheet.write(row, col+7, r.Rank)
+    # startlist_sheet.write(row, col+8, r.RankingPoints)
     row += 1
 
 workbook.close()
@@ -287,8 +295,16 @@ t = runnersperheat.assign(ID=runnersperheat.ID.abs())\
 t['Diff'] = t.apply ( lambda row: row.CountMax-row.CountMin, axis=1)
 print(t)
 
+max_per_heat = dfver.groupby('Heat').count()[['ID']].max()[0]
+
+for n in range(5, max_per_heat, 5):
+    print("******************")
+    print(f"Average ranking points of top {n} in each heat")
+    rpn = dfver.sort_values('RankingPoints', ascending=False).groupby('Heat').head(n).groupby('Heat').mean()[['RankingPoints']]
+    print (rpn)
 
 print("******************")
-print("Average ranking points")
+print("Average ranking points (all)")
 rp = dfver.groupby('Heat').mean()[['RankingPoints']]
 print (rp)
+
