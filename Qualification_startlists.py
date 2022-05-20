@@ -181,6 +181,7 @@ start_time = timeit.default_timer()
 entries_file = str(sys.argv[1]) if len(sys.argv) > 1 else 'entries.xlsx'
 start_list_file = str(sys.argv[2]) if len(sys.argv) > 2 else 'startlists.xlsx'
 sheet_name = str(sys.argv[3]) if len(sys.argv) > 3 else 0
+first_bib = int(sys.argv[4]) if len(sys.argv) > 4 else 1
 skip_rows = 0 if len(sys.argv) > 1 else 3  # The default 'entries.xlsx' has three blank rows before the header.
 
 # read entered runners data file
@@ -243,9 +244,11 @@ startlist_sheet.write(row, col+2, 'Surname')
 startlist_sheet.write(row, col+3, 'First name')
 startlist_sheet.write(row, col+4, 'Heat')
 startlist_sheet.write(row, col+5, 'Start Time')
-startlist_sheet.write(row, col+6, 'Start Group')
+startlist_sheet.write(row, col+6, 'Bib')
+startlist_sheet.write(row, col+7, 'Start Group')
 # startlist_sheet.write(row, col+7, 'Rank')
 # startlist_sheet.write(row, col+8, 'Score (based on ranking points)')
+heat_names=["A","B","C"]
 row = 1
 for r in runners:
     print(r.Heat, r.Time, r, r.FED, r.Rank, r.ID, sep =";")
@@ -253,9 +256,10 @@ for r in runners:
     startlist_sheet.write(row, col+1, r.FED)
     startlist_sheet.write(row, col+2, r.Surname)
     startlist_sheet.write(row, col+3, r.Firstname)
-    startlist_sheet.write(row, col+4, r.Heat)
+    startlist_sheet.write(row, col+4, heat_names[r.Heat-1])
     startlist_sheet.write(row, col+5, r.Time)
-    startlist_sheet.write(row, col+6, r.StartGrp)
+    startlist_sheet.write(row, col+6, r.Heat-1 + r.Time*3 + first_bib)
+    startlist_sheet.write(row, col+7, r.StartGrp)
     # startlist_sheet.write(row, col+7, r.Rank)
     # startlist_sheet.write(row, col+8, r.RankingPoints)
     row += 1
