@@ -182,6 +182,7 @@ entries_file = str(sys.argv[1]) if len(sys.argv) > 1 else 'entries.xlsx'
 start_list_file = str(sys.argv[2]) if len(sys.argv) > 2 else 'startlists.xlsx'
 sheet_name = str(sys.argv[3]) if len(sys.argv) > 3 else 0
 first_bib = int(sys.argv[4]) if len(sys.argv) > 4 else 1
+time_offset = int(sys.argv[5]) if len(sys.argv) > 5 else 0
 skip_rows = 0 if len(sys.argv) > 1 else 3  # The default 'entries.xlsx' has three blank rows before the header.
 
 # read entered runners data file
@@ -257,7 +258,7 @@ for r in runners:
     startlist_sheet.write(row, col+2, r.Surname)
     startlist_sheet.write(row, col+3, r.Firstname)
     startlist_sheet.write(row, col+4, heat_names[r.Heat-1])
-    startlist_sheet.write(row, col+5, r.Time)
+    startlist_sheet.write(row, col+5, r.Time + time_offset)
     startlist_sheet.write(row, col+6, r.Heat-1 + r.Time*3 + first_bib)
     startlist_sheet.write(row, col+7, r.StartGrp)
     # startlist_sheet.write(row, col+7, r.Rank)
