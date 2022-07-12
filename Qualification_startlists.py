@@ -13,6 +13,7 @@ import pandas as pd
 import datetime
 from random import sample
 import sys
+import random
 
 
 class Runner:
@@ -47,7 +48,7 @@ class Nation:
 
 def find_heats_time(_runners, _heats, _nations, _z):
     solver = pywraplp.Solver('SolveAssignmentProblemMIP', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
-    
+    random.shuffle(_runners)
     # define runners per heat
     base = len(_runners) // _heats
     runners_per_heat = [base for _h in range(1, _heats + 1)]
